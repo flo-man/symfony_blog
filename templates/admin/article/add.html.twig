@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <h1>Ajouter un article</h1>
+
+    {{ form_start(article_form) }}
+
+        {{ form_row(article_form.category, {label: 'Catégorie:'} ) }}
+        {{ form_row(article_form.title, {label: 'Titre:'} ) }}
+        {{ form_row(article_form.content, {label: 'Contenu:'} ) }}
+
+    <button type="submit" class="btn btn-success">
+        Enregistrer
+    </button>
+    <a href="{{ path('admin_article_list') }}" class="btn btn-outline-danger">
+        Retour
+    </a>
+
+    {{ form_end(article_form) }}
+
+{% endblock %}
+
+{% block title %}
+    Nouvel article
+{% endblock %}
+

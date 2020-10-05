@@ -6,6 +6,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Category;
 use App\Form\CategoryType;
+use App\Form\ConfirmationType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,11 +46,11 @@ class CategoryController extends AbstractController
         CategoryRepository $categoryRepository,
         $id
     ) {
-        if (is_null($id)) { // Création
+        if (is_null($id)) { // Création d'un catégorie
             $category = new Category();
-        }
+        } else {
         $category = $categoryRepository->find($id);
-
+        }
         // création du formulaire relié à la catégorie
         $form = $this->createForm(CategoryType::class, $category);
 
@@ -83,5 +84,29 @@ class CategoryController extends AbstractController
                 'form' => $form->createView()
             ]
         );
+    }
+
+    /**
+     * @Route("/suppression/{id}", name="admin_category_delete")
+     * Le ParamConverter (installé grâce à sensio/framework-extra-bundle) permet de convertir les paramètres
+     * des routes. Ici il va rechercher la Category en fonction de l'ID présent dans l'adresse
+     */
+    public function delete(Category $category, Request $request, EntityManagerInterface $em)
+    {
+        $form = $this->createForm(ConfirmationType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->remove($category);
+            $em->flush();
+
+            $this->addFlash('info', 'la catégorie ' . $category->getName() . ' a bien été supprimée.');
+            return $this->redirectToRoute('app_admin_category_index');
+        }
+
+        return $this->render('admin/category/delete.html.twig', [
+            'delete_form' => $form->createView(),
+            'category' => $category
+        ]);
     }
 }
