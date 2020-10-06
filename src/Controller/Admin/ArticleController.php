@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Article;
 use App\Form\ArticleType;
+use App\Form\ConfirmationType;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -78,6 +79,28 @@ class ArticleController extends AbstractController
         return $this->render('admin/article/edit.html.twig', [
             'article' => $article,
             'article_form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/suppression/{id}", name="delete")
+     */
+    public function delete(Article $article, Request $request, EntityManagerInterface $em)
+    {
+        $form = $this->createForm(ConfirmationType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->remove($article);
+            $em->flush();
+
+            $this->addFlash('info', 'l\'article ' . $article->getTitle() . ' a bien été supprimé.');
+            return $this->redirectToRoute('admin_article_list');
+        }
+
+        return $this->render('admin/article/delete.html.twig', [
+            'delete_form' => $form->createView(),
+            'article' => $article
         ]);
     }
 }
